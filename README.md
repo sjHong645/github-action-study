@@ -1,2 +1,3 @@
-# github-action-study
-github action을 공부하기 위한 리포지토리
+[Github Action Docs](https://docs.github.com/actions)
+
+[Learn GitHub Actions](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions)

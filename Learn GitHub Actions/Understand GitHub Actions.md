@@ -55,3 +55,11 @@ ex) GitHub으로 부터 git 저장소를 가져오기 / 빌드 환경에서 tool
 - 다른 OS가 필요하거나 특정 HW 구성을 필요로 할 때, 직접 runner를 호스팅할 수 있다.
 
 - [Hosting your own runners](https://docs.github.com/en/actions/hosting-your-own-runners)
+
+### [예시 workflow](https://github.com/sponbob-pat/github-action-study/blob/main/.github/workflows/learn-github-action.yml)
+
+### 예시 workflow를 그림으로 표현 
+
+![image](https://github.com/sponbob-pat/github-action-study/assets/64796257/fbc1f474-6747-4bd1-b363-8c2285074d05)
+
+

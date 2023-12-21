@@ -32,4 +32,26 @@ ex) PR 생성 / Issus open / commit push
 
 [workflow를 실행할 수 있도록 하는 모든 이벤트 목록](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows)
 
-### Jobs
+### Jobs : 동일한 runner에서 실행되는 workflow에 있는 단계(step)의 집합 
+
+- 각각의 단계(step)는 실행될 shell script이거나 동작할 action이다.
+- 단계(step)는 순서대로 실행되고 서로 종속적이다. 그리고 동일한 runner에서 실행되기 때문에 한 단계에서 다른 단계로 데이터를 공유할 수 있다.
+- 기본적으로 `Job`은 종속성이 없고 서로 병렬적으로 실행된다.
+- 하지만, job의 종속성을 다른 job과 함께 구성할 수 있다. 만약에 어떤 job이 다른 job에 종속되면 해당 job이 완료될 때 까지 기다렸다가 실행할 수 있다.
+
+- [job에 대한 자세한 내용](https://docs.github.com/en/actions/using-jobs)
+
+### Action : 복잡하지만 자주 반복되는 작업을 수행하는 GitHub Action 플랫폼의 사용자 지정 응용프로그램 
+
+- Action을 사용해서 반복되는 코드의 양을 줄일 수 있다. 
+ex) GitHub으로 부터 git 저장소를 가져오기 / 빌드 환경에서 toolchain 설정하기 / 클라우드 공급자에게 인증 설정하기 
+
+- 직접 만들거나 GitHub Marketplace에서 사용할 action을 찾을 수 있음
+- [Action에 대한 자세한 내용](https://docs.github.com/en/actions/creating-actions)
+
+### Runners : workflow가 실행될 때 그 workflow을 실행하는 서버
+
+- 각 runner는 한 번에 하나의 job만 실행할 수 있다.
+- 다른 OS가 필요하거나 특정 HW 구성을 필요로 할 때, 직접 runner를 호스팅할 수 있다.
+
+- [Hosting your own runners](https://docs.github.com/en/actions/hosting-your-own-runners)

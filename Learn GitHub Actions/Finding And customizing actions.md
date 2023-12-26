@@ -36,3 +36,7 @@ workflow를 안정적으로 유지하기 위해서는 action의 버전을 참고
 3. 이렇게 복사한 action을 workflow의 새로운 step에 붙여넣는다.
 4. 만약, 해당 action이 입력값(input)을 원할 경우 그 값을 설정해준다.
 
+### 동일한 repository에서 Action을 추가하는 방법
+
+
+

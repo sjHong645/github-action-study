@@ -24,3 +24,15 @@ workflow에서 사용하는 action은 3개의 위치에서 정의할 수 있다.
 
 ## Workflow에 Action을 추가하는 방법 
 
+### GitHub Marketplace을 통한 작업 추가 
+
+github marketplace에 있는 action들은 `action의 버전`과 `workflow 구문을 통해 사용하는 방법`에 대한 정보를 포함하고 있다. 
+workflow를 안정적으로 유지하기 위해서는 action의 버전을 참고해야 한다. 
+
+해당 과정들은 workflow 편집기에서 수행한 작업들이다. 
+
+1. workflow에서 사용할 action을 찾는다. 
+2. Installation 밑에 있는 copy를 클릭한다.
+3. 이렇게 복사한 action을 workflow의 새로운 step에 붙여넣는다.
+4. 만약, 해당 action이 입력값(input)을 원할 경우 그 값을 설정해준다.
+

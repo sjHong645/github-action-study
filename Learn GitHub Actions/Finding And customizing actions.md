@@ -38,5 +38,73 @@ workflow를 안정적으로 유지하기 위해서는 action의 버전을 참고
 
 ### 동일한 repository에서 Action을 추가하는 방법
 
+ex) repository 파일 구조 
+```
+|-- hello-world (repository)
+|   |__ .github
+|       └── workflows
+|           └── my-first-workflow.yml
+|       └── actions
+|           |__ hello-world-action
+|               └── action.yml
+```
 
+ex) workflow 파일 ⇒ 위 예시 repo에서 `/hello-world` 에 위치한 상황
+```
+jobs:
+  my_first_job:
+    runs-on: ubuntu-latest
+    steps:
+      # This step checks out a copy of your repository.
+      - name: My first step - check out repository
+        uses: actions/checkout@v4
 
+      # This step references the directory that contains the action.
+      # 해당 단계(step)에서 같은 repo에 있는 
+      # .github/actions/hello-world-action 폴더에 위치한
+      # action.yml을 사용하는 작업 
+      - name: Use local hello-world-action
+        uses: ./.github/actions/hello-world-action
+```
+
+`action.yml` 파일은 action에 대한 메타데이터를 제공하기 위해 사용된다.  
+자세한 내용 : [Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions)
+
+### 다른 repository에서 Action을 추가하는 방법 
+
+앞서 얘기한 `동일한 repository에서 Action을 추가하는 방법`과 동일한 원리를 적용하면 된다. 
+
+ex) 추가하고자 하는 action의 정보
+- owner 이름 : other-owner
+- repository 이름 : other-repo
+
+이라고 하면 다음과 같이 workflow를 작성해줘야 한다.
+
+ex) 
+```
+jobs:
+  my_first_job:
+    steps:
+      - name: My first step
+        uses: other-owner/other-repo@v3 # {소유자}/{repo이름}@{ref}
+```
+
+### Docker Hub에 있는 컨테이너를 참조하는 방법 
+
+action이 docker 컨테이너 이미지를 통해 정의되었다면 다음과 같은 구문을 이용해서 action을 참조해야 한다.
+
+- 구문
+```
+docker://{이미지이름}:{태그}
+```
+
+ex) 
+```
+jobs:
+  my_first_job:
+    steps:
+      - name: My first step
+        uses: docker://alpine:3.8 # alpine이라는 이미지의 3.8 태그를 참조
+```
+
+## 

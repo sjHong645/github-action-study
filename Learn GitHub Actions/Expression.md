@@ -34,3 +34,40 @@ boolean, null, number는 `${{`와 `}}`로 묶어줘야 한다.
 
 ## Operators(연산자) 
 
+| Operator    | Description |
+| ---         | ---         |
+| `( )`       | 논리적 그룹화 |
+| `[ ]`       | Index |
+| `.`         | 속성(Property) 참조 해제 |
+| `!`         | Not |
+| `<`         | Less than |
+| `<=`        | Less than or equal |
+| `>`         | Greater than |
+| `>=`        | Greater than or equal |
+| `==`        | Equal |
+| `!=`        | Not equal |
+| `&&`        | And |
+| <code>\|\|</code> | Or |
+
+ex) 
+```
+env:
+  MY_ENV_VAR: ${{ github.ref == 'refs/heads/main' && 'value_for_main_branch' || 'value_for_other_branches' }}
+```
+
+위 예제는 `MY_ENV_VAR`이라는 변수를 설정하는 식이다. 
+
+Github의 참조(Reference)가 `refs/heads/main`에 설정되었는지 여부에 따라 값이 달라진다. 
+
+- 설정되었다면 `value_for_main_branch`로 변수값이 설정됨
+- 설정되지 않았다면 `value_for_other_branches`로 변수값이 설정된다.
+
+즉, 위 예제를 일반화하면 다음과 같다. 
+```
+env:
+  MY_ENV_VAR: ${{ 조건 && 참일경우 저장될 값 || 거짓일경우 저장될 값 }}
+```
+
+## Functions(함수) 
+
+

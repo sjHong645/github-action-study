@@ -98,13 +98,14 @@ jobs:
 
 ```
 
-### `vars` 컨텍스트를 이용한 환경변수 접근 
+### `vars` 컨텍스트를 이용한 설정변수 접근 
 
 ```
 on:
   workflow_dispatch:
 env:
   # Setting an environment variable with the value of a configuration variable
+  # 설정변수의 값을 가지고 환경변수를 설정하는 부분
   env_var: ${{ vars.ENV_CONTEXT_VAR }}
 
 jobs:
@@ -134,7 +135,32 @@ jobs:
 
 ```
 
-### `vars` 컨텍스트를 이용한 설정변수 접근 
-
-
 ## [기본 환경변수](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables)
+
+해당 링크 참조 
+
+## OS 판별 
+
+`RUNNER_OS` 기본 환경변수와 컨텍스트의 속성 `${{ runner.os }}`을 사용해서  
+서로 다른 OS에서 사용되는 하나의 workflow 파일을 만들 수 있다. 
+
+ex) `macos-latest`에서 `windows-latest`로 OS가 성공적으로 변경되었는지 확인하는 workflow 
+```
+jobs:
+  if-Windows-else:
+    runs-on: macos-latest
+    steps:
+      - name: condition 1
+        if: runner.os == 'Windows' # runner의 os를 check 
+        run: echo "The operating system on the runner is $env:RUNNER_OS." # windows 방식의 환경변수 선언법
+      - name: condition 2
+        if: runner.os != 'Windows' # runner의 os를 check 
+        run: echo "The operating system on the runner is not Windows, it's $RUNNER_OS." # linux 방식의 환경변수 선언법
+
+```
+
+## step과 job 사이에 값을 전달하기 
+
+`GITHUB_ENV` 환경 파일은 action에서 바로 사용되거나 shell 커맨드에서 `run` 키워드를 통해 사용될 수도 있다. [자세한 내용](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable)
+
+어떤 job에 있는 step에서 다른 job에 있는 step으로 값을 전달하고 싶다면 `job output`으로 값을 정의해서 사용할 수 있다. `job output`을 통해 다른 job에 있는 step이 값을 참조할 수 있게 된다. [자세한 내용](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idoutputs)

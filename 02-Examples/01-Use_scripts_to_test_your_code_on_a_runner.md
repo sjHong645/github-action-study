@@ -13,7 +13,7 @@ Github Actions의 주요 CI 기능 중 일부를 에시로 보여주는 workflow
 
 아래 workflow는 설명서의 모든 페이지 내용을 렌더링하고 모든 내부 링크가 올바르게 연결되어 있는지 확인한다. 
 
-```
+``` yaml
 # workflow의 이름을 정의한다. Github Repository > Action 탭에 정의한 이름이 나타난다. 
 name: 'Link Checker: All English'
 

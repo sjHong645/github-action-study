@@ -1,4 +1,4 @@
-이번에는 CI에서 사용하는 고급 GitHub Actions 특징을 살펴볼 것이다. 
+이번에는 고급 GitHub Actions 특징을 살펴볼 것이다. 마찬가지로 CI를 위해 사용한 workflow다.
 
 ## 개요 
 

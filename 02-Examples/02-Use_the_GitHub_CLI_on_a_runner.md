@@ -62,29 +62,36 @@ jobs:
           script/check-english-links.js > broken_links.md
 
       # check-english-links.js 스크립트가 broken links를 발견한다면 0이 아닌값(failure)을 반환한다.
-      # 그러면 broken_links.md 파일의 첫 줄의 값을 갖는 출력값을 설정할 workflow command를 사용한다. 
+      # 그러면 broken_links.md 파일의 첫 줄의 값을 갖는 출력값을 설정할 workflow command를 사용한다.
 
-      # 
-      # `check-english-links.js` returns 0 if no links are broken, and 1 if any links are broken. When an Actions step's exit code is 1, the action run's job status is failure and the run ends.
-      #
-      # The following steps create an issue for the broken link report only if any links are broken, so `if: ${{ failure() }}` ensures the steps run despite the previous step's failure of the job.
+      # check-english-links.js 를 실행했을 때 link가 깨지지 않았다면 0을 반환하고 그렇지 않으면 1을 반환한다.
+      # Actions의 step의 exit code가 1이라면 action의 run의 job 상태는 실패(failure)가 되면서 run이 종료된다.
+      # 다음 step은 깨진 링크가 존재하는 경우에만 bronken link report의 issue를 만든다. 
+      # 따라서 if: ${{ failure() }}는 이전 단계의 작업 실패에도 불구하고 단계가 실행되도록 한다. 
+
       - if: ${{ failure() }}
         name: Get title for issue
         id: check
-        run: echo "title=$(head -1 broken_links.md)" >> $GITHUB_OUTPUT
-      # Uses the `peter-evans/create-issue-from-file` action to create a new GitHub issue. This example is pinned to a specific version of the action, using the `ceef9be92406ace67ab5421f66570acf213ec395` SHA.
+        run: echo "title=$(head -1 broken_links.md)" >> $GITHUB_OUTPUT # broken_links.md 파일의 첫 줄의 값을 갖는 출력값을 설정할 workflow command
+
+      # peter-evans/create-issue-from-file라는 action을 사용한다. 이 action은 새로운 Github Issue를 생성하는 action이다.
+      # 여기서는 ceef9be92406ace67ab5421f66570acf213ec395 SHA 값 버전을 갖는 action을 사용하도록 했다. 
       - if: ${{ failure() }}
         name: Create issue from file
         id: broken-link-report
         uses: peter-evans/create-issue-from-file@ceef9be92406ace67ab5421f66570acf213ec395
         with:
           token: ${{ env.GITHUB_TOKEN }}
-
           title: ${{ steps.check.outputs.title }}
           content-filepath: ./broken_links.md
           repository: ${{ env.REPORT_REPOSITORY }}
           labels: ${{ env.REPORT_LABEL }}
-      # Uses [`gh issue list`](https://cli.github.com/manual/gh_issue_list) to locate the previously created issue from earlier runs. This is [aliased](https://cli.github.com/manual/gh_alias_set) to `gh list-reports` for simpler processing in later steps.
+
+
+      # [`gh issue list`](https://cli.github.com/manual/gh_issue_list)
+      # [aliased](https://cli.github.com/manual/gh_alias_set) to `gh list-reports` for simpler processing in later steps.
+      # gh issue list : 앞선 run에서 생성한 issue를 가리키기 위해 사용함
+      # alias : gh list-report
       - if: ${{ failure() }}
         name: Close and/or comment on old issues
         env:

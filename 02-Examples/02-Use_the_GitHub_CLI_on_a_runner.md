@@ -90,19 +90,26 @@ jobs:
 
       # [`gh issue list`](https://cli.github.com/manual/gh_issue_list)
       # [aliased](https://cli.github.com/manual/gh_alias_set) to `gh list-reports` for simpler processing in later steps.
-      # gh issue list : 앞선 run에서 생성한 issue를 가리키기 위해 사용함
-      # alias : gh list-report
       - if: ${{ failure() }}
         name: Close and/or comment on old issues
         env:
           NEW_REPORT_URL: 'https://github.com/${{ env.REPORT_REPOSITORY }}/issues/${{ steps.broken-link-report.outputs.issue-number }}'
         run: |
+          # gh 명령어를 사용해서 list-reports 라는 별칭을 설정했다.
+          # 별칭의 내용은 큰따옴표로 둘러싸인 내용이다.
+          # 앞선 run에서 생성한 issue들을 나타내는 내용이다.
+          
+          # 이 코드는 두 개의 코드가 겹쳐있다.
+          # 1. gh issue list \ ~~
+          # 2. gh alias set list-reports "1번 내용"
+
           gh alias set list-reports "issue list \
                                        --repo ${{ env.REPORT_REPOSITORY }} \
                                        --author ${{ env.REPORT_AUTHOR }} \
                                        --label '${{ env.REPORT_LABEL }}'"
 
-
+          # 이는 환경변수 previous_report_url를 지정하는 부분이다.
+          # 지정할 값은 $(~~)이다. 
           previous_report_url=$(gh list-reports \
                                   --state all \
                                   --limit 2 \
@@ -110,13 +117,19 @@ jobs:
                                   --jq '.[].url' \
                                   | grep -v ${{ env.NEW_REPORT_URL }} | head -1)
 
-          # [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment) is used to add a comment to the new issue that links to the previous one.
+          # [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment)
+          # gh issue comment는 앞서 생성했던 새 issue에 댓글을 추가하기 위해 사용한다
           gh issue comment ${{ env.NEW_REPORT_URL }} --body "⬅️ [Previous report]($previous_report_url)"
 
-          # If an issue from a previous run is open and assigned to someone, then use [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment) to add a comment with a link to the new issue without closing the old report. To get the issue URL, the `jq` expression processes the resulting JSON output.
-          #
-          # If an issue from a previous run is open and is not assigned to anyone, use [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment) to add a comment with a link to the new issue. Then use [`gh issue close`](https://cli.github.com/manual/gh_issue_close) and [`gh issue edit`](https://cli.github.com/manual/gh_issue_edit) to close the issue and remove it from the project board.
+          # [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment)
+          # [`gh issue close`](https://cli.github.com/manual/gh_issue_close)
+          # [`gh issue edit`](https://cli.github.com/manual/gh_issue_edit) 
 
+          # 만약 이전 run의 issue가 open 되어 있고 누군가에게 할당(assigned)되어 있다면 gh issue comment를 사용해서 오래된 report를 close 하지 않고
+          # 새로운 issue와의 link를 첨부한 댓글을 추가할 수 있다. issue URL을 얻어내기 위해 jq 표현식이 JSON output의 결과값을 처리한다.
+
+          # 만약 이전 run의 issue가 open 되어 있고 누군가에게 할당(assigned)되어 있지 않다면 gh issue comment를 사용해서 새 issue와의 link를 첨부한 댓글을 추가할 수 있다.
+          # 그렇게 하고 나서 gh issue close와 gh issue edit 명령어를 사용해서 issue를 close하고 project board에서 삭제한다. 
           for issue_url in $(gh list-reports \
                                   --json assignees,url \
                                   --jq '.[] | select (.assignees != []) | .url'); do
@@ -132,10 +145,10 @@ jobs:
             if [ "$issue_url" != "${{ env.NEW_REPORT_URL }}" ]; then
               gh issue comment $issue_url --body "➡️ [Newer report](${{ env.NEW_REPORT_URL }})"
 
-              # Use [`gh issue close`](https://cli.github.com/manual/gh_issue_close) to close the old issue.
+              # 오래된 issue를 삭제하기 위해 사용함 
               gh issue close $issue_url
 
-              # Use [`gh issue edit`](https://cli.github.com/manual/gh_issue_edit) to edit the old issue and remove it from a specific GitHub project board.
+              # gh issue edit 명령어를 사용해서 old issue를 수정하고 project board에서 삭제한다.
               gh issue edit $issue_url --remove-project "${{ env.FIRST_RESPONDER_PROJECT }}"
             fi
           done

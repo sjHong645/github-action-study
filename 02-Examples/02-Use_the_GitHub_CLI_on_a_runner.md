@@ -6,7 +6,8 @@ workflow의 내용은 [01번 문서](https://github.com/sponbob-pat/github-actio
 ![image](https://github.com/sponbob-pat/github-action-study/assets/64796257/cb2dc56f-082c-46eb-b3cb-39e64cea9617)
 
 ## 예시 workflow 
-```
+
+``` yaml
 name: Check all English links
 
 # schedule 이벤트에서 cron 구문을 사용했다.

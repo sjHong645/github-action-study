@@ -7,24 +7,16 @@
 ## 파일 
 
 ``` yaml
-# This defines the name of the workflow as it will appear in the "Actions" tab of the GitHub repository.
 name: Node.js Tests
 
-# The `on` keyword lets you define the events that trigger when the workflow is run. You can define multiple events here. For more information, see "[AUTOTITLE](/actions/using-workflows/triggering-a-workflow#using-events-to-trigger-workflows)."
 on:
 
-# Add the `workflow_dispatch` event if you want to be able to manually run this workflow. For more information, see [`workflow_dispatch`](/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch).
   workflow_dispatch:
-
-# Add the `pull_request` event, so that the workflow runs automatically every time a pull request is created or updated. For more information, see [`pull_request`](/actions/using-workflows/events-that-trigger-workflows#pull_request).
   pull_request:
-
-# Add the `push` event with the `branch` filter, so that the workflow runs automatically every time a commit is pushed to a branch called "main". For more information, see [`push`](/actions/using-workflows/events-that-trigger-workflows#push).
   push:
     branches:
       - main
 
-# This modifies the default permissions granted to `GITHUB_TOKEN`. This will vary depending on the needs of your workflow. For more information, see "[AUTOTITLE](/actions/using-jobs/assigning-permissions-to-jobs)."
 permissions:
   contents: read
   pull-requests: read
@@ -36,18 +28,15 @@ concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
-# This groups together all the jobs that run in the workflow file.
+
 jobs:
 
 # This defines a job with the ID `test` that is stored within the `jobs` key.
   test:
 
-# This configures the job to run on a GitHub-hosted runner or a self-hosted runner, depending on the repository running the workflow.
-#
-# In this example, the job will run on a self-hosted runner if the repository is named `docs-internal` and is within the `github` organization. If the repository doesn't match this path, then it will run on an `ubuntu-latest` runner hosted by GitHub. For more information on these options, see "[AUTOTITLE](/actions/using-jobs/choosing-the-runner-for-a-job)."
     runs-on: ${{ fromJSON('["ubuntu-latest", "self-hosted"]')[github.repository == 'github/docs-internal'] }}
 
-# This sets the maximum number of minutes to let the job run before it is automatically canceled. For more information, see [`timeout-minutes`](/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idtimeout-minutes).
+    # job이 동작하는 최대 시간 60분. 물론 그전에 workflow가 끝나면 종료됨
     timeout-minutes: 60
 
 # This section defines the build matrix for your jobs.

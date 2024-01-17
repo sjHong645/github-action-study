@@ -21,9 +21,9 @@ permissions:
   contents: read
   pull-requests: read
 
-# The `concurrency` key ensures that only a single workflow in the same concurrency group will run at the same time. For more information, see "[AUTOTITLE](/actions/using-jobs/using-concurrency)."
-# `concurrency.group` generates a concurrency group name from the workflow name and pull request information. The `||` operator is used to define fallback values.
-# `concurrency.cancel-in-progress` cancels any currently running job or workflow in the same concurrency group.
+# concurrency 키를 통해 동일한 concurrency 그룹에 있는 workflow가 동시에 동작한다는 걸 보장한다.
+# group : 여기서는 workflow의 이름과 PR의 정보를 가지고 그룹의 이름을 만들도록 설정함. 즉, 그룹의 이름을 적는 곳
+# cancel-in-progress : 동일한 concurrency 그룹에서 동작중인 job 또는 workflow를 취소할 수 있는지 여부를 설정 (true / false)
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true

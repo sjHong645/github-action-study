@@ -30,8 +30,7 @@ concurrency:
 
 
 jobs:
-
-# This defines a job with the ID `test` that is stored within the `jobs` key.
+  # ID가 test인 job 
   test:
 
     runs-on: ${{ fromJSON('["ubuntu-latest", "self-hosted"]')[github.repository == 'github/docs-internal'] }}
@@ -39,13 +38,13 @@ jobs:
     # job이 동작하는 최대 시간 60분. 물론 그전에 workflow가 끝나면 종료됨
     timeout-minutes: 60
 
-# This section defines the build matrix for your jobs.
+    # job에 대한 build matrix를 정의하는 부분 
     strategy:
-
-# Setting `fail-fast` to `false` prevents GitHub from cancelling all in-progress jobs if any matrix job fails.
+      # fail-fast를 false로 지정함으로써 Github가 어떤 matrix가 fail 되더라도 동작하고 있던 job을 취소하는 걸 막는다. 
       fail-fast: false
 
-# This creates a matrix named `test-group`, with an array of test groups. These values match the names of test groups that will be run by `npm test`.
+      # test-group이라는 이름의 matrix를 만들었다.
+      # 이 값들은 앞으로 실행할 npm test에 의해 실핼될 test group의 이름이다. 
       matrix:
         test-group:
           [
@@ -58,18 +57,17 @@ jobs:
             linting,
             translations,
           ]
-
-# This groups together all the steps that will run as part of the `test` job. Each job in a workflow has its own `steps` section.
+    
     steps:
-
-# The `uses` keyword tells the job to retrieve the action named `actions/checkout`. This is an action that checks out your repository and downloads it to the runner, allowing you to run actions against your code (such as testing tools). You must use the checkout action any time your workflow will use your repository's code. Some extra options are provided to the action using the `with` key.
+      # with 키를 사용해서 action에 부가적인 정보를 제공한다. 
       - name: Check out repo
         uses: actions/checkout@v4
         with:
           lfs: ${{ matrix.test-group == 'content' }}
           persist-credentials: 'false'
 
-# If the current repository is the `github/docs-internal` repository, this step uses the `actions/github-script` action to run a script to check if there is a branch called `docs-early-access`.
+      # 현재 repository가 github/docs-internal이라면, actions/github-script action을 사용한다.
+      # 해당 action은 docs-early-access라는 이름의 branch가 있는지 없는지 체크한다. 
       - name: Figure out which docs-early-access branch to checkout, if internal repo
         if: ${{ github.repository == 'github/docs-internal' }}
         id: check-early-access
@@ -98,6 +96,7 @@ jobs:
             }
 
 # If the current repository is the `github/docs-internal` repository, this step checks out the branch from the `github/docs-early-access` that was identified in the previous step.
+
       - name: Check out docs-early-access too, if internal repo
         if: ${{ github.repository == 'github/docs-internal' }}
         uses: actions/checkout@v4

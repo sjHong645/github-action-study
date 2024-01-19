@@ -95,8 +95,8 @@ jobs:
               throw err
             }
 
-# If the current repository is the `github/docs-internal` repository, this step checks out the branch from the `github/docs-early-access` that was identified in the previous step.
-
+      # 현재 repository가 github/docs-internal인 경우
+      # 이전 단계에서 확인했던 github/docs-early-access branch를 checkout 한다.
       - name: Check out docs-early-access too, if internal repo
         if: ${{ github.repository == 'github/docs-internal' }}
         uses: actions/checkout@v4
@@ -106,7 +106,10 @@ jobs:
           path: docs-early-access
           ref: ${{ steps.check-early-access.outputs.result }}
 
-# If the current repository is the `github/docs-internal` repository, this step uses the `run` keyword to execute shell commands to move the `docs-early-access` repository's folders into the main repository's folders.
+      # 현재 repostory가 github/docs-internal인 경우,
+      # shell 명령을 실행하기 위해서 run 키워드를 사용한다.
+      # shell 명령의 내용은 docs-early-access repository의 폴더를 main repository 폴더로 옮긴다는 내용이다.
+      # 여기서는 docs-early-access의 하위 폴더 assets, content, data 폴더를 이동시키고 나서 docs-early-access 폴더를 삭제했다. 
       - name: Merge docs-early-access repo's folders
         if: ${{ github.repository == 'github/docs-internal' }}
         run: |
@@ -116,45 +119,53 @@ jobs:
           rm -r docs-early-access
 
 # This step runs a command to check out large file storage (LFS) objects from the repository.
+      # run 명령어를 사용해 shell 명령을 실행한다.
+      # repository에 있는 Large File Storage를 checkout 하기 위해서 실행한다.
       - name: Checkout LFS objects
         run: git lfs checkout
 
-# This step uses the `trilom/file-changes-action` action to gather the files changed in the pull request, so they can be analyzed in the next step. This example is pinned to a specific version of the action, using the `a6ca26c14274c33b15e6499323aac178af06ad4b` SHA.
+      # trilom/file-changes-action 액션을 사용해서 PR에서 변경된 파일을 모아서 다음 단계(step)에서 분석될 수 있도록 한다. 
+      # SHA값 a6ca26c14274c33b15e6499323aac178af06ad4b로 버전을 특정했다. 
       - name: Gather files changed
         uses: trilom/file-changes-action@a6ca26c14274c33b15e6499323aac178af06ad4b
         id: get_diff_files
         with:
           output: ' '
 
-# This step runs a shell command that uses an output from the previous step to create a file containing the list of files changed in the pull request.
+      # PR에서 변경된 파일의 리스트를 저장한 이전 단계(step)의 결과물(output)을 사용하는 shell 명령을 실행한다. 
       - name: Insight into changed files
         run: |
 
           echo "${{ steps.get_diff_files.outputs.files }}" > get_diff_files.txt
 
-# This step uses the `actions/setup-node` action to install the specified version of the `node` software package on the runner, which gives you access to the `npm` command.
+      # actions/setup-node 액션을 사용해서 특정 버전의 node SW 패키지를 runner에 설치한다.
+      # 해당 node SW 패키지는 npm 명령어를 사용할 수 있도록 해준다. 
       - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 16.14.x
           cache: npm
 
-# This step runs the `npm ci` shell command to install the npm software packages for the project.
+      # npm ci 명령을 사용해서 프로젝트에 npm SW 패키지를 설치하도록 했다. 
       - name: Install dependencies
         run: npm ci
 
-# This step uses the `actions/cache` action to cache the Next.js build, so that the workflow will attempt to retrieve a cache of the build, and not rebuild it from scratch every time. For more information, see "[AUTOTITLE](/actions/using-workflows/caching-dependencies-to-speed-up-workflows)."
+      # actions/cache 액션을 사용해서 Next.js 빌드를 캐시한다. 그래서 workflow는 build의 캐시를 불러와서 매번 재빌딩하지 않는다.
       - name: Cache nextjs build
         uses: actions/cache@v3
         with:
           path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('package*.json') }}
 
-# This step runs the build script.
+      # build 스크립트를 실행 
       - name: Run build script
         run: npm run build
 
 # This step runs the tests using `npm test`, and the test matrix provides a different value for `${{ matrix.test-group }}` for each job in the matrix. It uses the `DIFF_FILE` environment variable to know which files have changed, and uses the `CHANGELOG_CACHE_FILE_PATH` environment variable for the changelog cache file.
+      # npm test를 사용해서 테스트를 실행한다.
+      # test matrix는 matrix에 있는 각각의 job의 ${{ matrix.test-group }}에 대한 서로 다른 값을 제공한다.
+      # DIFF_FILE이라는 환경 변수를 사용해서 어떤 파일에 변화가 생겼는지 파악하고
+      # changelog 캐시 파일에 관한 CHANGELOG_CACHE_FILE_PATH라는 환경 변수를 사용한다. 
       - name: Run tests
         env:
           DIFF_FILE: get_diff_files.txt

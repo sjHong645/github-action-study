@@ -54,5 +54,150 @@ jobs:
 
 ## starter workflow 사용 
 
-Github는 미리 설정된 starter workflow를 제공해서 나만의 CI(Continuous Integration) 재가
+Github는 미리 설정된 starter workflow를 제공해서 나만의 CI(Continuous Integration) workflow를 만들 수 있다. 
 
+- [모든 starter workflow들](https://github.com/actions/starter-workflows)
+
+## workflow 고급 특징 
+
+고급 특징 중 몇 가지만 간단하게 살펴보도록 하겠다. 
+
+### 비밀값 저장 
+
+workflow가 민감한 데이터를 사용한다면 이 값들을 Github에서 `secrets`으로 저장해서 workflow의 환경변수로 사용할 수 있다. 
+
+ex)  
+```
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve secret
+        env:
+          super_secret: ${{ secrets.SUPERSECRET }}
+        run: |
+          example-command "$super_secret"
+```
+
+[자세한 내용](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
+
+### dependent job 만들기 
+
+기본적으로 workflow의 job은 동시에 병렬적으로 실행된다. 
+만약, 다른 작업이 완료되고 나서 실행해야 하는 job이 있다면 `needs`라는 키워드를 이용해서 종속성을 만들 수 있다. 
+
+ex)  
+```
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./setup_server.sh
+  build:
+    needs: setup # setup이라는 job이 끝난 다음에 실행할 수 있는 작업 
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./build_server.sh
+  test:
+    needs: build # build라는 job이 끝난 다음에 실행할 수 있는 작업 
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./test_server.sh
+```
+
+### matrix 사용 
+
+matrix를 사용하면 하나의 job에서 변수의 조합을 바탕으로 여러 개의 job을 동작시키도록 할 수 있다.
+
+matrix는 `strategy`라는 키워드를 사용해서 만든다. strategy 키워드는 배열로 빌드 옵션을 수신한다. 
+
+ex) 다른 버전의 Node.js를 사용해서 job을 여러 번 실행하도록 matrix를 만들었다.  
+```
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16]
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+```
+
+[자세한 내용](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs)
+
+### 종속성 캐싱 
+
+job이 정기적으로 종속성을 재사용한다면 해당 파일들을 캐싱하는 방법을 고려할 수 있다.  
+한 번 캐싱해놓으면 똑같은 repository에 있는 모든 workflow에서 사용할 수 있다. 
+
+ex) `~/.npm` 디렉토리를 캐싱하느 예시 
+```
+jobs:
+  example-job:
+    steps:
+      - name: Cache node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+```
+
+[자세한 내용](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows)
+
+### DB 및 서비스 컨테이너 사용 
+
+job에 DB 또는 cache 서비스가 필요한 경우 `service` 키워드를 사용하여 서비스를 호스팅하는 임시 컨테이너를 만들 수 있다. 
+그러면 해당 job의 모든 step에서 결과값으로 나온 컨테이너를 사용할 수 있고 job이 끝나면 삭제된다. 
+
+ex) service를 사용해서 postgres 컨테이너를 만들고 서비스를 연결할 때 `node`를 사용한 예시 
+
+```
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container: node:10.18-jessie
+    services:
+      postgres:
+        image: postgres
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Connect to PostgreSQL
+        run: node client.js
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
+```
+
+### label을 사용한 workflow 라우팅 
+
+특정 유형의 runner가 job에서 동작하길 원한다면 job이 어디에서 실행되는지 제어하기 위해서 label을 사용할 수 있다.  
+
+
+ex) workflow에서 label을 사용해서 필요한 runner를 지정하는 예시 
+```
+jobs:
+  example-job:
+    runs-on: [self-hosted, linux, x64, gpu]
+```
+
+workflow는 `runs-on` 배열에 있는 label만 동작시킬 수 있다. 
+
+[self-host에 대한 내용](https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/using-labels-with-self-hosted-runners) / [Github-host에 대한 내용](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources)
+
+### workflow 재사용 
+
+하나의 workflow가 다른 workflow를 호출할 수 있다. 이렇게 재사용함으로써 중복을 피하고 workflow를 유지하기 더욱 쉬워진다.  
+[자세한 내용](https://docs.github.com/en/actions/using-workflows/reusing-workflows)
+
+### 환경 사용 
+
+[자세한 내용](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
